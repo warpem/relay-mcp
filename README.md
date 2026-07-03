@@ -8,8 +8,16 @@ Installing this plugin gives Claude:
 
 ## Installation
 
+**Step 1 — add this repo as a marketplace** (one-time):
+
 ```
-/plugin install https://github.com/warpem/relay-mcp
+/marketplace add https://github.com/warpem/relay-mcp
+```
+
+**Step 2 — install the plugin:**
+
+```
+/plugin install relay
 ```
 
 Claude Code will prompt you for two values:
@@ -22,7 +30,7 @@ That's it. The MCP server and domain skill load automatically on the next sessio
 ### Updating
 
 ```
-/plugin update https://github.com/warpem/relay-mcp
+/plugin update relay
 ```
 
 ## What Claude can do

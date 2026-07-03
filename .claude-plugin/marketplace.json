@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "warpem-relay-mcp",
+  "description": "Relay cryo-EM/cryo-ET workflow platform plugin for Claude Code",
+  "owner": {
+    "name": "Dimitry Tegunov"
+  },
+  "plugins": [
+    {
+      "name": "relay",
+      "description": "Connect Claude Code to your institution's Relay cryo-EM/cryo-ET workflow platform. Provides MCP tools for managing projects, spaces, and processing pipelines, plus a skill with domain knowledge about the workflow.",
+      "author": {
+        "name": "Dimitry Tegunov"
+      },
+      "category": "development",
+      "source": ".",
+      "homepage": "https://github.com/warpem/relay-mcp"
+    }
+  ]
+}
