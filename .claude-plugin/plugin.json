@@ -1,0 +1,22 @@
+{
+  "name": "relay",
+  "description": "Connect Claude Code to your institution's Relay cryo-EM workflow platform. Provides MCP tools for managing projects, spaces, and processing pipelines, plus a skill with domain knowledge about the workflow.",
+  "author": {
+    "name": "Dimitry Tegunov"
+  },
+  "userConfig": {
+    "server_url": {
+      "type": "string",
+      "title": "Relay server URL",
+      "description": "The base URL of your institution's Relay server, e.g. https://relay.example.com (provided by your cluster admin)",
+      "required": true
+    },
+    "api_token": {
+      "type": "string",
+      "title": "Personal access token",
+      "description": "Your Relay personal access token — generate one in Relay under your user settings",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}
