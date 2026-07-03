@@ -9,12 +9,21 @@ Installing this plugin gives Claude:
 ## Installation
 
 ```
-/plugin install relay@<marketplace>
+/plugin install https://github.com/warpem/relay-mcp
 ```
 
-When prompted, enter:
+Claude Code will prompt you for two values:
+
 - **Relay server URL** — the base URL of your institution's Relay server (e.g. `https://relay.yourlab.edu`). Your cluster admin will provide this.
 - **Personal access token** — generate one in Relay under your user settings. Tokens carry independent read/write/manage permissions per tier (projects, spaces, jobs), so ask your admin what access level you need.
+
+That's it. The MCP server and domain skill load automatically on the next session.
+
+### Updating
+
+```
+/plugin update https://github.com/warpem/relay-mcp
+```
 
 ## What Claude can do
 
