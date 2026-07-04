@@ -32,10 +32,10 @@ All tools require a Bearer token (Personal Access Token, PAT). Tokens carry thre
 | Tier | Controls |
 |------|----------|
 | Project | `list_projects`, `create_project`, `delete_project` |
-| Space | `list_spaces`, `list_views`, `create_space`, `delete_space` |
+| Space | `list_spaces`, `list_views`, `create_space`, `reconnect_space`, `create_view`, `delete_space` |
 | Job | All job tools (list, get, create, configure, connect, queue, abort, delete) |
 
-Read tools (list/get) need `Read`. Mutation tools (`create_*`, `configure_*`, `queue_*`, `abort_*`, `connect_*`) need `EditRun`. Destructive tools (`delete_*`, `clear_job`) need `Manage`.
+Read tools (list/get) need `Read`. Mutation tools (`create_*`, `reconnect_*`, `configure_*`, `queue_*`, `abort_*`, `connect_*`) need `EditRun`. Destructive tools (`delete_*`, `clear_job`) need `Manage`.
 
 ## Tool Reference
 
@@ -43,9 +43,9 @@ Read tools (list/get) need `Read`. Mutation tools (`create_*`, `configure_*`, `q
 
 | Tool | Purpose |
 |------|---------|
-| `list_projects` | All projects the current user can access |
-| `list_spaces(projectId)` | Spaces in a project |
-| `list_views(projectId, spaceId)` | Views in a space (needed for `create_job`) |
+| `list_projects` | All projects the current user can access (includes `emoji`, `notes` when set) |
+| `list_spaces(projectId)` | Spaces in a project (includes `emoji`, `notes` when set) |
+| `list_views(projectId, spaceId)` | Views in a space (includes `emoji`, `notes` when set; needed for `create_job`) |
 | `list_jobs(projectId, spaceId)` | All jobs with their status |
 | `get_job(projectId, spaceId, jobId)` | Full job detail: parameters, ports, connections |
 | `list_job_types()` | All registered job types with category path and GUID |
@@ -66,9 +66,11 @@ Read tools (list/get) need `Read`. Mutation tools (`create_*`, `configure_*`, `q
 
 | Tool | Permission | Purpose |
 |------|-----------|---------|
-| `create_project(alias?, emoji?)` | Project EditRun | New project |
+| `create_project(alias?, emoji?, notes?)` | Project EditRun | New project |
 | `delete_project(projectId)` | Project Manage | Delete project |
-| `create_space(projectId, alias?, emoji?)` | Space EditRun | New space + auto view |
+| `create_space(projectId, rootDirectory, alias?, emoji?, notes?)` | Space EditRun | New space + auto-created View 1; `rootDirectory` (must exist, must be empty of any space.relay) is required |
+| `reconnect_space(projectId, path)` | Space EditRun | Attach an existing space.relay on disk to a project |
+| `create_view(projectId, spaceId, alias?, emoji?, notes?)` | Space EditRun | New view in an existing space |
 | `delete_space(projectId, spaceId)` | Space Manage | Delete space |
 | `create_job(projectId, spaceId, viewId, typeGuid)` | Job EditRun | New job (Building status) |
 | `configure_job(projectId, spaceId, jobId, parameters)` | Job EditRun | Set parameters by name→value map |
@@ -202,15 +204,15 @@ Connect jobs in order: output port resource type must match the downstream input
 ## Building a Pipeline: Step-by-Step
 
 ```
-1. list_projects()                          → pick projectId
-2. create_space(projectId, alias)           → spaceId (View 1 auto-created)
-3. list_views(projectId, spaceId)           → viewId
-4. list_job_types()                         → find typeGuid for each step
-5. get_job_type(typeGuid)                   → inspect parameters and ports
-6. create_job(projectId, spaceId, viewId, typeGuid)  → jobId
+1. list_projects()                                          → pick projectId
+2. create_space(projectId, rootDirectory, alias)            → spaceId (View 1 auto-created)
+3. list_views(projectId, spaceId)                          → viewId
+4. list_job_types()                                         → find typeGuid for each step
+5. get_job_type(typeGuid)                                   → inspect parameters and ports
+6. create_job(projectId, spaceId, viewId, typeGuid)         → jobId
 7. configure_job(projectId, spaceId, jobId, {ParameterName: value, ...})
-8. connect_jobs(..., fromPort, ..., toPort) → edges must match resource types
-9. list_queues()                            → pick queueId (omit for local)
+8. connect_jobs(..., fromPort, ..., toPort)                 → edges must match resource types
+9. list_queues()                                            → pick queueId (omit for local)
 10. queue_job(projectId, spaceId, jobId, queueId?)
 11. Poll: get_job() → watch Status field (Running → Finished or Failed)
 12. list_job_results() → get_job_result_link() to download outputs
@@ -223,6 +225,8 @@ Connect jobs in order: output port resource type must match the downstream input
 **Job not in Building** — `configure_job` and `connect_jobs` fail on jobs that are Waiting, Running, etc. Call `clear_job` (needs Manage) to reset, or `clone_job` for a fresh copy.
 
 **No view exists** — `create_job` needs a `viewId`. `create_space` auto-creates one view, but always call `list_views` to get its id before calling `create_job`.
+
+**Directory already has a space** — `create_space` refuses if a `space.relay` file already exists in the target directory. Use `reconnect_space` to attach a disconnected space, or pick an empty directory.
 
 **Skipping CTF before picking** — CTF estimation must run before template matching in cryo-ET workflows; the CTF data is embedded in the dataset and required for correlation scoring.
 
